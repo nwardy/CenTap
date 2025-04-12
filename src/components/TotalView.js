@@ -37,7 +37,7 @@ const TotalView = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))',
-        gap: '8px',
+        gap: '12px',
         padding: '16px'
       }}>
         {attendees.map(attendee => (
@@ -50,7 +50,9 @@ const TotalView = () => {
             borderRadius: '4px',
             cursor: 'pointer'
           }}>
-            <StatusIndicator isPresent={attendee.present} />
+            <div style={{ marginBottom: '8px' }}>
+              <StatusIndicator isPresent={attendee.present} />
+            </div>
             <div style={{
               whiteSpace: 'nowrap',
               overflow: 'hidden',

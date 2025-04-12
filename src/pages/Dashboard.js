@@ -16,14 +16,25 @@ const Dashboard = () => {
   }
   
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
       <AppHeader stats={stats} viewMode={viewMode} setViewMode={setViewMode} />
       
-      <div style={{ display: 'flex' }}>
-        <div style={{ flex: 1 }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'row', 
+        flexWrap: 'wrap',
+        gap: '16px'
+      }}>
+        <div style={{ 
+          flex: '1 1 600px',
+          minWidth: '0'
+        }}>
           {viewMode === 'list' ? <AttendanceList /> : <TotalView />}
         </div>
-        <div style={{ width: '350px' }}>
+        <div style={{ 
+          flex: '0 1 350px',
+          minWidth: '300px'
+        }}>
           <NFCScanner />
         </div>
       </div>

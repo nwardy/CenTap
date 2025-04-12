@@ -11,7 +11,7 @@ const StatusIndicator = ({ isPresent }) => {
         height: '16px',
         borderRadius: '50%',
         backgroundColor,
-        marginRight: '8px'
+        margin: '0'
       }}
     />
   );

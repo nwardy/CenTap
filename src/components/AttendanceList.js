@@ -18,8 +18,11 @@ const AttendanceList = () => {
     <div>
       <div style={{
         display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
         alignItems: 'center',
+        gap: '16px',
         padding: '16px',
         backgroundColor: colors.primary,
         borderBottom: `1px solid ${colors.border}`
@@ -70,7 +73,11 @@ const AttendanceList = () => {
         </div>
       </div>
       
-      <div style={{ maxHeight: 'calc(100vh - 180px)', overflowY: 'auto' }}>
+      <div style={{ 
+        maxHeight: 'calc(100vh - 180px)', 
+        overflowY: 'auto',
+        width: '100%'
+      }}>
         {filteredAttendees.length === 0 ? (
           <div style={{ padding: '16px', textAlign: 'center', color: colors.textSecondary }}>
             No attendees found with the selected filter.
