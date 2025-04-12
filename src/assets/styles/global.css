@@ -1,0 +1,46 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #F8F9FA;
+    color: #202124;
+  }
+  
+  .app {
+    min-height: 100vh;
+  }
+  
+  /* Animation for scanning pulse effect */
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 15px rgba(26, 115, 232, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(26, 115, 232, 0);
+    }
+  }
+  
+  button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+  
+  button:active {
+    transform: scale(0.98);
+  }

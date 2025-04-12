@@ -1,0 +1,66 @@
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #DADCE0;
+  }
+  
+  .status-indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .status-indicator.present {
+    background-color: #34A853;
+  }
+  
+  .status-indicator.absent {
+    background-color: #EA4335;
+  }
+  
+  .grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+    padding: 16px;
+  }
+  
+  .attendee-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #DADCE0;
+  }
+  
+  .scanner-pulse {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .scanner-pulse.active {
+    animation: pulse 1.5s infinite;
+    background-color: #1A73E8;
+    color: white;
+  }
+  
+  .scanner-pulse.inactive {
+    background-color: #F1F3F4;
+    color: #202124;
+  }
