@@ -17,9 +17,8 @@ const AppHeader = ({ stats, viewMode, setViewMode }) => {
         display: 'flex',
         alignItems: 'center'
       }}>
-        {/* Logo will go here */}
         <img 
-          src="/logo.png" 
+          src={require('../assets/images/logo.png')} 
           alt="CenTap Logo" 
           style={{
             height: '100%',
