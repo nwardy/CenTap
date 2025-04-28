@@ -6,7 +6,6 @@ const AttendanceCard = ({ attendee }) => {
   const { name, present, checkInTime, photoUrl, nfcTagId } = attendee;
   const [showDetails, setShowDetails] = useState(false);
   
-  // Handle click to toggle details
   const handleClick = () => {
     setShowDetails(!showDetails);
   };

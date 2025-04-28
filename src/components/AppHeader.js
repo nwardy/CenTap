@@ -1,7 +1,7 @@
 import React from 'react';
 import { colors } from '../assets/styles/colors';
 
-const AppHeader = ({ stats, viewMode, setViewMode }) => {
+const AppHeader = ({ stats }) => {
   return (
     <header style={{
       display: 'flex',
@@ -37,37 +37,6 @@ const AppHeader = ({ stats, viewMode, setViewMode }) => {
       }}>
         <div>
           <strong>{stats.present}</strong>/{stats.total} Present ({stats.rate}%)
-        </div>
-        <div style={{
-          display: 'flex',
-          backgroundColor: colors.hover,
-          borderRadius: '4px',
-          overflow: 'hidden'
-        }}>
-          <button 
-            onClick={() => setViewMode('list')}
-            style={{
-              padding: '8px 12px',
-              border: 'none',
-              backgroundColor: viewMode === 'list' ? colors.secondary : 'transparent',
-              color: viewMode === 'list' ? 'white' : colors.textPrimary,
-              cursor: 'pointer'
-            }}
-          >
-            List View
-          </button>
-          <button 
-            onClick={() => setViewMode('grid')}
-            style={{
-              padding: '8px 12px',
-              border: 'none',
-              backgroundColor: viewMode === 'grid' ? colors.secondary : 'transparent',
-              color: viewMode === 'grid' ? 'white' : colors.textPrimary,
-              cursor: 'pointer'
-            }}
-          >
-            Total View
-          </button>
         </div>
       </div>
     </header>

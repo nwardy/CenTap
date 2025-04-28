@@ -1,9 +1,21 @@
-// Check if NFC is supported and polyfill if necessary
-const hasNFC = typeof window !== 'undefined' && 'NDEFReader' in window;
+//Our NFC service that handles all tag scanning operations
+
+export const isNFCSupported = () => {
+  return typeof window !== 'undefined' && 'NDEFReader' in window;
+};
+export const formatTagId = (rawTagId) => {
+  const cleanTagId = String(rawTagId).replace(/[^a-zA-Z0-9]/g, '');
+  
+  if (cleanTagId.startsWith('nfc-')) {
+    return cleanTagId;
+  }
+  
+  return `nfc-${cleanTagId}`;
+};
 
 export const scanNFCTag = async () => {
   try {
-    if (hasNFC) {
+    if (isNFCSupported()) {
       const ndef = new window.NDEFReader();
       await ndef.scan();
       
@@ -13,47 +25,39 @@ export const scanNFCTag = async () => {
             if (record.recordType === "text") {
               const textDecoder = new TextDecoder();
               const nfcTagId = textDecoder.decode(record.data);
-              resolve(nfcTagId);
+              resolve(formatTagId(nfcTagId));
             }
           }
         };
       });
     } else {
       console.log('NFC not supported, using simulation mode');
-      // Simulate an NFC tag reading for demo purposes
       return Promise.resolve(simulateScan());
     }
   } catch (error) {
     console.error('Error scanning NFC tag:', error);
-    // Fall back to simulation in case of error
     return simulateScan();
   }
 };
 
-export const writeNFCTag = async (tagId) => {
-  try {
-    if (hasNFC) {
-      const ndef = new window.NDEFReader();
-      await ndef.write({
-        records: [{
-          recordType: "text",
-          data: tagId
-        }]
-      });
-      return true;
-    } else {
-      console.log('NFC not supported, simulating write');
-      return true; // Simulate successful write
-    }
-  } catch (error) {
-    console.error('Error writing to NFC tag:', error);
-    throw error;
-  }
-};
-
-// This is a mock function for demo purposes
 export const simulateScan = () => {
-  // Generate a random tag ID between 1 and 200
   const randomId = Math.floor(Math.random() * 200) + 1;
   return `nfc-${randomId}`;
+};
+
+export const getNFCErrorMessage = (error) => {
+  if (!error) return 'Unknown error';
+  
+  switch (error.name) {
+    case 'NotAllowedError':
+      return 'Permission to use NFC was denied';
+    case 'NotSupportedError':
+      return 'NFC is not supported on this device';
+    case 'TimeoutError':
+      return 'The NFC operation timed out';
+    case 'AbortError':
+      return 'The NFC operation was aborted';
+    default:
+      return error.message || 'An unknown NFC error occurred';
+  }
 };

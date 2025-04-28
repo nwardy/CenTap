@@ -6,9 +6,7 @@ export const AttendanceProvider = ({ children }) => {
   const [attendees, setAttendees] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Initialize with 200 attendees
   useEffect(() => {
-    // First names and last names to generate realistic attendee names
     const firstNames = [
       "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", 
       "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica",
@@ -62,13 +60,42 @@ export const AttendanceProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Check in an attendee using NFC tag ID
   const checkInAttendee = (nfcTagId) => {
     setAttendees(prev => prev.map(attendee => 
       attendee.nfcTagId === nfcTagId 
         ? { ...attendee, present: true, checkInTime: new Date() } 
         : attendee
     ));
+  };
+  
+  const findAttendeesByName = (searchName) => {
+    if (!searchName || searchName.trim() === '') return [];
+    
+    const normalizedSearch = searchName.toLowerCase().trim();
+    return attendees.filter(attendee => 
+      attendee.name.toLowerCase().includes(normalizedSearch)
+    );
+  };
+  
+  const manualCheckIn = (attendeeId) => {
+    const attendee = attendees.find(a => a.id === attendeeId);
+    if (attendee) {
+      setAttendees(prev => prev.map(a => 
+        a.id === attendeeId 
+          ? { ...a, present: true, checkInTime: new Date() } 
+          : a
+      ));
+      return attendee;
+    }
+    return null;
+  };
+
+  const resetAttendance = () => {
+    setAttendees(prev => prev.map(attendee => ({
+      ...attendee,
+      present: false,
+      checkInTime: null
+    })));
   };
 
   // Get statistics
@@ -91,6 +118,9 @@ export const AttendanceProvider = ({ children }) => {
       attendees,
       loading,
       checkInAttendee,
+      resetAttendance,
+      findAttendeesByName,
+      manualCheckIn,
       getStats
     }}>
       {children}

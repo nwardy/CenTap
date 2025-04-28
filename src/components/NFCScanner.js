@@ -4,7 +4,7 @@ import { scanNFCTag } from '../services/nfcService';
 import { colors } from '../assets/styles/colors';
 
 const NFCScanner = () => {
-  const { checkInAttendee, attendees } = useContext(AttendanceContext);
+  const { checkInAttendee, attendees, findAttendeesByName, manualCheckIn } = useContext(AttendanceContext);
   const [scanning, setScanning] = useState(false);
   const [lastScanned, setLastScanned] = useState(null);
   const [error, setError] = useState(null);
@@ -13,11 +13,15 @@ const NFCScanner = () => {
   const [successScan, setSuccessScan] = useState(false);
   const photoTimeoutRef = useRef(null);
   const successTimeoutRef = useRef(null);
+  
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // Start NFC scanning
   const startScanning = () => {
     try {
-      setScanning(false); // Just set state to active, no actual scanning
+      setScanning(false);
       setError(null);
       setScanningActive(true);
     } catch (err) {
@@ -25,40 +29,32 @@ const NFCScanner = () => {
     }
   };
   
-  // Stop NFC scanning
   const stopScanning = () => {
     setScanningActive(false);
     setScanning(false);
   };
 
-  // Set the last scanned attendee
   const setScannedAttendee = (attendee) => {
     setLastScanned(attendee);
-    setShowPhoto(false); // No popup animation
+    setShowPhoto(false);
     
-    // Trigger success animation
     setSuccessScan(true);
     
-    // Clear any previous timeout
     if (successTimeoutRef.current) {
       clearTimeout(successTimeoutRef.current);
     }
     
-    // Reset success animation after 1.5 seconds
     successTimeoutRef.current = setTimeout(() => {
       setSuccessScan(false);
     }, 1500);
   };
   
-  // Simulate an ID scan (for demo button)
   const handleTestScan = () => {
     if (!scanningActive) return;
     
     setScanning(true);
     
-    // Show scanning animation for 1.5 seconds
     setTimeout(() => {
-      // Pick a random attendee that isn't already checked in
       const availableAttendees = attendees.filter(a => !a.present);
       
       if (availableAttendees.length > 0) {
@@ -68,7 +64,6 @@ const NFCScanner = () => {
         checkInAttendee(randomAttendee.nfcTagId);
         setScannedAttendee(randomAttendee);
       } else {
-        // If all attendees are checked in, reset one random attendee to not present
         const randomIndex = Math.floor(Math.random() * attendees.length);
         const resetAttendee = {
           ...attendees[randomIndex],
@@ -76,7 +71,6 @@ const NFCScanner = () => {
           checkInTime: null
         };
         
-        // Then check them in
         checkInAttendee(resetAttendee.nfcTagId);
         setScannedAttendee(resetAttendee);
       }
@@ -85,10 +79,40 @@ const NFCScanner = () => {
     }, 1500);
   };
 
-  // Clean up on unmount
+  const handleSearch = () => {
+    if (searchQuery.trim() === '') {
+      setSearchResults([]);
+      setSearchPerformed(false);
+      return;
+    }
+    
+    const results = findAttendeesByName(searchQuery);
+    setSearchResults(results);
+    setSearchPerformed(true);
+  };
+  
+  const handleManualCheckIn = (attendeeId) => {
+    const checkedInAttendee = manualCheckIn(attendeeId);
+    if (checkedInAttendee) {
+      setLastScanned(checkedInAttendee);
+      setSuccessScan(true);
+      
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+      successTimeoutRef.current = setTimeout(() => {
+        setSuccessScan(false);
+      }, 1500);
+      
+      setSearchQuery('');
+      setSearchResults([]);
+      setSearchPerformed(false);
+      setShowManualEntry(false);
+    }
+  };
+  
   useEffect(() => {
     return () => {
-      // Clear timeouts on unmount
       if (photoTimeoutRef.current) {
         clearTimeout(photoTimeoutRef.current);
       }
@@ -108,7 +132,34 @@ const NFCScanner = () => {
       margin: '0',
       height: '100%'
     }}>
-      <h2 style={{ color: colors.textPrimary, marginTop: 0 }}>NFC Scanner</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 style={{ color: colors.textPrimary, marginTop: 0, marginBottom: 0 }}>NFC Scanner</h2>
+        
+        {/* Simulate Scan Button (Orange Circle) */}
+        <button
+          onClick={handleTestScan}
+          disabled={!scanningActive}
+          title="Simulate ID Scan"
+          style={{
+            backgroundColor: '#FF9800',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: !scanningActive ? 'not-allowed' : 'pointer',
+            opacity: !scanningActive ? 0.6 : 1,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            fontSize: '16px',
+            fontWeight: 'bold'
+          }}
+        >
+          ⚡
+        </button>
+      </div>
       
       <div style={{
         display: 'flex',
@@ -199,25 +250,168 @@ const NFCScanner = () => {
         </div>
       )}
       
-      <button
-        onClick={handleTestScan}
-        disabled={!scanningActive}
-        style={{
-          backgroundColor: '#FF9800',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          padding: '12px 24px',
-          fontWeight: 'bold',
-          cursor: !scanningActive ? 'not-allowed' : 'pointer',
-          opacity: !scanningActive ? 0.6 : 1,
+      <div style={{ marginTop: '16px', width: '100%' }}>
+        <button
+          onClick={() => setShowManualEntry(!showManualEntry)}
+          style={{
+            backgroundColor: colors.secondary,
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '12px 16px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            width: '100%',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          {showManualEntry ? 'Cancel Manual Entry' : 'Manual Entry'}
+        </button>
+      </div>
+      
+      {/* Manual Entry Section */}
+      {showManualEntry && (
+        <div style={{
           marginTop: '16px',
-          width: '100%',
+          padding: '16px',
+          backgroundColor: colors.hover,
+          borderRadius: '8px',
           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-        }}
-      >
-        Simulate ID Scan (Demo Only)
-      </button>
+        }}>
+          <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: colors.textPrimary }}>
+            Manual Check-in
+          </h3>
+          
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Enter attendee name"
+              style={{
+                flex: '1',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                border: `1px solid ${colors.border}`,
+                fontSize: '14px'
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
+            />
+            <button
+              onClick={handleSearch}
+              style={{
+                backgroundColor: colors.secondary,
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '8px 12px',
+                cursor: 'pointer'
+              }}
+            >
+              Search
+            </button>
+          </div>
+          
+          {/* Search Results */}
+          {searchPerformed && (
+            <div style={{ 
+              maxHeight: '200px', 
+              overflowY: 'auto',
+              backgroundColor: 'white',
+              borderRadius: '4px',
+              border: searchResults.length ? `1px solid ${colors.border}` : 'none'
+            }}>
+              {searchResults.length === 0 ? (
+                <div style={{ 
+                  padding: '12px', 
+                  textAlign: 'center',
+                  color: colors.textSecondary 
+                }}>
+                  No attendees found with that name
+                </div>
+              ) : (
+                searchResults.map(attendee => (
+                  <div 
+                    key={attendee.id}
+                    style={{
+                      padding: '12px',
+                      borderBottom: `1px solid ${colors.border}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: attendee.present ? 'default' : 'pointer',
+                      backgroundColor: attendee.present ? 'rgba(52, 168, 83, 0.05)' : 'white'
+                    }}
+                    onClick={() => !attendee.present && handleManualCheckIn(attendee.id)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <img 
+                        src={attendee.photoUrl} 
+                        alt={attendee.name}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      <div>
+                        <div style={{ 
+                          fontWeight: '500',
+                          color: colors.textPrimary
+                        }}>
+                          {attendee.name}
+                        </div>
+                        <div style={{ 
+                          fontSize: '12px',
+                          color: colors.textSecondary 
+                        }}>
+                          ID: {attendee.nfcTagId}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {attendee.present ? (
+                      <div style={{ 
+                        color: colors.success,
+                        fontWeight: '500',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <span style={{ fontSize: '16px' }}>✓</span> Present
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleManualCheckIn(attendee.id);
+                        }}
+                        style={{
+                          backgroundColor: colors.secondary,
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '6px 12px',
+                          cursor: 'pointer',
+                          fontSize: '13px'
+                        }}
+                      >
+                        Check In
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      )}
       
       {lastScanned && (
         <div 
